@@ -24,6 +24,10 @@ Este documento registra todas as alterações feitas em relação ao upstream.
 |---------|-----------|
 | scripts/sync-upstream.sh | Script para sincronização com upstream |
 | .github/workflows/deploy.yml | Pipeline de CI/CD para deploy em AWS ECS |
+| src/custom/controllers/health.controller.ts | Health checks avançados (liveness, readiness) |
+| src/custom/routes/health.router.ts | Rotas de health check customizadas |
+| src/custom/middleware/rate-limit.middleware.ts | Rate limiting por API key usando Redis |
+| src/custom/README.md | Documentação completa das customizações |
 
 ### Docker
 | Arquivo | Alteração |
