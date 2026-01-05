@@ -1,0 +1,100 @@
+version: "3.8"
+
+services:
+  # ============================================
+  # Evolution API - Custom Build
+  # ============================================
+  api:
+    container_name: wa-evolution-api-local
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile.custom
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - postgres
+    ports:
+      - "8080:8080"
+    volumes:
+      - evolution_instances:/evolution/instances
+    networks:
+      - evolution-local
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=development
+      - DATABASE_CONNECTION_URI=postgresql://evolution:evolution123@postgres:5432/evolution_db?schema=evolution_api
+      - CACHE_REDIS_URI=redis://redis:6379/0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  postgres:
+    container_name: wa-evolution-postgres-local
+    image: postgres:15-alpine
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - max_connections=1000
+      - -c
+      - listen_addresses=*
+    environment:
+      - POSTGRES_DB=evolution_db
+      - POSTGRES_USER=evolution
+      - POSTGRES_PASSWORD=evolution123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - evolution-local
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution -d evolution_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Redis Cache
+  # ============================================
+  redis:
+    container_name: wa-evolution-redis-local
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+      --port 6379
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - evolution-local
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  evolution_instances:
+    name: wa-evolution-instances-local
+  postgres_data:
+    name: wa-evolution-postgres-local
+  redis_data:
+    name: wa-evolution-redis-local
+
+networks:
+  evolution-local:
+    name: wa-evolution-local
+    driver: bridge

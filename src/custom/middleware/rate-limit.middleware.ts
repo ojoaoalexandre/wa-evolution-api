@@ -98,7 +98,7 @@ export class RateLimitMiddleware {
 
       next();
     } catch (error) {
-      this.logger.error('Rate limit middleware error:', error);
+      this.logger.error(`Rate limit middleware error: ${error}`);
       // On error, allow the request to proceed (fail open)
       next();
     }

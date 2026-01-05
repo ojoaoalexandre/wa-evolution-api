@@ -59,7 +59,7 @@ export class CustomHealthController {
 
       res.status(isHealthy ? 200 : 503).json(response);
     } catch (error) {
-      this.logger.error('Health check failed:', error);
+      this.logger.error(`Health check failed: ${error}`);
       res.status(503).json({
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -113,7 +113,7 @@ export class CustomHealthController {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      this.logger.error('Readiness check failed:', error);
+      this.logger.error(`Readiness check failed: ${error}`);
       res.status(503).json({
         ready: false,
         timestamp: new Date().toISOString(),
@@ -132,12 +132,12 @@ export class CustomHealthController {
 
     try {
       const start = Date.now();
-      await this.prismaRepository.instance.findMany({ take: 1 });
+      await this.prismaRepository.instance.count();
       const latency = Date.now() - start;
 
       return { status: 'ok', latency };
     } catch (error) {
-      this.logger.error('Database health check failed:', error);
+      this.logger.error(`Database health check failed: ${error}`);
       return { status: 'error', message: String(error) };
     }
   }
@@ -160,7 +160,7 @@ export class CustomHealthController {
 
       return { status: 'ok', latency };
     } catch (error) {
-      this.logger.error('Redis health check failed:', error);
+      this.logger.error(`Redis health check failed: ${error}`);
       return { status: 'error', message: String(error) };
     }
   }
@@ -190,7 +190,7 @@ export class CustomHealthController {
         disconnected: instanceList.length - connected,
       };
     } catch (error) {
-      this.logger.error('Instances check failed:', error);
+      this.logger.error(`Instances check failed: ${error}`);
       return { status: 'error', total: 0, connected: 0, disconnected: 0 };
     }
   }
