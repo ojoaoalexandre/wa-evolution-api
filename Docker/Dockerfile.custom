@@ -73,6 +73,7 @@ COPY --from=builder --chown=evolution:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=evolution:nodejs /app/package.json ./
 COPY --from=builder --chown=evolution:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=evolution:nodejs /app/public ./public
+COPY --from=builder --chown=evolution:nodejs /app/manager ./manager
 
 # Create instances directory for WhatsApp sessions
 RUN mkdir -p /evolution/instances && chown -R evolution:nodejs /evolution
